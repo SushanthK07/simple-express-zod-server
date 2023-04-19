@@ -1,6 +1,11 @@
 import { Request, Response } from "express";
 import * as z from "zod";
 
+const getRequestQuerySchema = z.object({
+  name: z.string(),
+  age: z.coerce.number().optional(),
+});
+
 const postRequestBodySchema = z.object({
   names: z.array(z.string()),
 });
@@ -18,7 +23,15 @@ const postResponseSchema = z.object({
 const router = require("express").Router();
 
 router.get("/", (req: Request, res: Response) => {
-  res.send("Hello " + req.query.name);
+  let validatedQuery;
+  try {
+    validatedQuery = getRequestQuerySchema.parse(req.query);
+  } catch (err) {
+    console.error(err);
+    return res.status(400).send("Bad request");
+  }
+
+  res.send("Hello " + validatedQuery.name + " " + validatedQuery.age);
 });
 
 router.post("/:by", (req: Request, res: Response) => {
