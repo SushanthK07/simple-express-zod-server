@@ -1,61 +1,54 @@
-import { Request, Response } from "express";
-import * as z from "zod";
-
-const getRequestQuerySchema = z.object({
-  name: z.string(),
-  age: z.coerce.number().optional(),
-});
-
-const postRequestBodySchema = z.object({
-  names: z.array(z.string()),
-});
-
-const postRequestParamsSchema = z.object({
-  by: z.string().refine((value) => !["undefined", "null"].includes(value), {
-    message: "by should be defined",
-  }),
-});
-
-const postResponseSchema = z.object({
-  message: z.string(),
-});
+import { Response } from "express";
+import {
+  getRequestQuerySchema,
+  postRequestBodySchema,
+  postRequestParamsSchema,
+  postResponseSchema,
+} from "../schema/wish";
+import { ValidatedRequest, validateRequest } from "../schema/validateRequest";
 
 const router = require("express").Router();
 
-router.get("/", (req: Request, res: Response) => {
-  let validatedQuery;
-  try {
-    validatedQuery = getRequestQuerySchema.parse(req.query);
-  } catch (err) {
-    console.error(err);
-    return res.status(400).send("Bad request");
+router.get(
+  "/",
+  validateRequest({
+    querySchema: getRequestQuerySchema,
+  }),
+  (req: ValidatedRequest<typeof getRequestQuerySchema>, res: Response) => {
+    const { query } = req.validatedData;
+    const name = query.name;
+    const age = query.age;
+
+    res.send("Hello " + name + " " + age);
   }
+);
 
-  res.send("Hello " + validatedQuery.name + " " + validatedQuery.age);
-});
+router.post(
+  "/:by",
+  validateRequest({
+    bodySchema: postRequestBodySchema,
+    paramsSchema: postRequestParamsSchema,
+  }),
+  (
+    req: ValidatedRequest<
+      typeof getRequestQuerySchema,
+      typeof postRequestBodySchema,
+      typeof postRequestParamsSchema
+    >,
+    res: Response
+  ) => {
+      const { body, params } = req.validatedData;
+    const names = body.names;
+    const by = params.by;
+    const message = "Hello " + names.join(", ") + " by " + by;
 
-router.post("/:by", (req: Request, res: Response) => {
-  let validatedBody;
-  let validatedParams;
-
-  try {
-    validatedBody = postRequestBodySchema.parse(req.body);
-    validatedParams = postRequestParamsSchema.parse(req.params);
-  } catch (err) {
-    console.error(err);
-    return res.status(400).send("Bad request");
+    try {
+      return res.send(postResponseSchema.parse({ message }));
+    } catch (err) {
+      console.error(err);
+      return res.status(500).send("Internal server error");
+    }
   }
-
-  const names = validatedBody.names;
-  const by = validatedParams.by;
-  const message = "Hello " + names.join(", ") + " by " + by;
-
-  try {
-    return res.send(postResponseSchema.parse({ message }));
-  } catch (err) {
-    console.error(err);
-    return res.status(500).send("Internal server error");
-  }
-});
+);
 
 module.exports = router;
