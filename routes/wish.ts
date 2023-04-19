@@ -1,8 +1,7 @@
 import { Response } from "express";
 import {
-  getRequestQuerySchema,
-  postRequestBodySchema,
-  postRequestParamsSchema,
+  getRequestSchema,
+  postRequestSchema,
   postResponseSchema,
 } from "../schema/wish";
 import { ValidatedRequest, validateRequest } from "../schema/validateRequest";
@@ -11,13 +10,11 @@ const router = require("express").Router();
 
 router.get(
   "/",
-  validateRequest({
-    querySchema: getRequestQuerySchema,
-  }),
-  (req: ValidatedRequest<typeof getRequestQuerySchema>, res: Response) => {
-    const { query } = req.validatedData;
-    const name = query.name;
-    const age = query.age;
+  validateRequest(getRequestSchema),
+  (req: ValidatedRequest<typeof getRequestSchema>, res: Response) => {
+    const validatedData = req.validatedData;
+    const name = validatedData.name;
+    const age = validatedData.age;
 
     res.send("Hello " + name + " " + age);
   }
@@ -25,21 +22,11 @@ router.get(
 
 router.post(
   "/:by",
-  validateRequest({
-    bodySchema: postRequestBodySchema,
-    paramsSchema: postRequestParamsSchema,
-  }),
-  (
-    req: ValidatedRequest<
-      typeof getRequestQuerySchema,
-      typeof postRequestBodySchema,
-      typeof postRequestParamsSchema
-    >,
-    res: Response
-  ) => {
-      const { body, params } = req.validatedData;
-    const names = body.names;
-    const by = params.by;
+  validateRequest(postRequestSchema),
+  (req: ValidatedRequest<typeof postRequestSchema>, res: Response) => {
+    const validatedData = req.validatedData;
+    const names = validatedData.names;
+    const by = validatedData.by;
     const message = "Hello " + names.join(", ") + " by " + by;
 
     try {

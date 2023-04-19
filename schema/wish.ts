@@ -1,15 +1,12 @@
 import * as z from "zod";
 
-const getRequestQuerySchema = z.object({
+const getRequestSchema = z.object({
   name: z.string(),
   age: z.coerce.number().optional(),
 });
 
-const postRequestBodySchema = z.object({
+const postRequestSchema = z.object({
   names: z.array(z.string()),
-});
-
-const postRequestParamsSchema = z.object({
   by: z.string().refine((value) => !["undefined", "null"].includes(value), {
     message: "by should be defined",
   }),
@@ -20,8 +17,7 @@ const postResponseSchema = z.object({
 });
 
 export {
-  getRequestQuerySchema,
-  postRequestBodySchema,
-  postRequestParamsSchema,
+  getRequestSchema,
+  postRequestSchema,
   postResponseSchema,
 };
