@@ -1,4 +1,5 @@
 const express = require("express");
+const greet = require("./routes/greet");
 
 const app = express();
 
@@ -9,6 +10,8 @@ app.use(express.urlencoded({ extended: true }));
 app.get("/", (req, res) => {
     res.send("Hello world");
 });
+
+app.use("/greet", greet);
 
 app.listen(3000, () => {
     console.log("Server is running on port 3000");
