@@ -1,5 +1,6 @@
 const express = require("express");
 const greet = require("./routes/greet");
+const wish = require("./routes/wish");
 
 const app = express();
 
@@ -12,6 +13,8 @@ app.get("/", (req, res) => {
 });
 
 app.use("/greet", greet);
+
+app.use("/wish", wish);
 
 app.listen(3000, () => {
     console.log("Server is running on port 3000");
