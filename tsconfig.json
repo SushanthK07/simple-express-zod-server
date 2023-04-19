@@ -5,6 +5,7 @@
     "outDir": "dist",
     "esModuleInterop": true,
     "sourceMap": true,
-    "allowJs": true
+    "allowJs": true,
+    "strict": true
   }
 }
